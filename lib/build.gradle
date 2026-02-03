@@ -16,7 +16,7 @@ repositories {
 }
 
 group = 'com.adcalls'
-version = '1.0.1'
+version = '1.1.0'
 
 dependencies {
     testImplementation libs.junit.jupiter
@@ -25,6 +25,10 @@ dependencies {
 
     implementation 'org.slf4j:slf4j-api:2.0.9'
 
+    compileOnly 'org.springframework:spring-context:6.1.12'
+    compileOnly 'org.springframework:spring-aop:6.1.12'
+    compileOnly 'org.aspectj:aspectjweaver:1.9.22'
+    compileOnly 'org.springframework.boot:spring-boot-autoconfigure:3.3.3'
 }
 
 java {
@@ -50,7 +54,7 @@ publishing {
 
             pom {
                 name = 'ExceptionLogger'
-                description = 'A custom exception class that automatically logs to SLF4J when thrown.'
+                description = 'A Java library for exception logging via SLF4J. Provides both a self-logging exception class (ExceptionLogger) and a Spring AOP annotation (@LogExceptions) for automatic exception logging.'
                 url = 'https://github.com/AdCalls/java-exception-logger'
 
                 licenses {
