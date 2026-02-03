@@ -1,4 +1,4 @@
-package org.example;
+package com.adcalls;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,9 +6,18 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * A custom exception that automatically logs to SLF4J when thrown.
+ */
 public class ExceptionLogger extends Exception {
     private static final Logger log = LoggerFactory.getLogger(ExceptionLogger.class);
 
+    /**
+     * Creates a new ExceptionLogger and logs the message, parameters, and stack trace.
+     *
+     * @param message the error message
+     * @param params  optional parameters to log alongside the message
+     */
     public ExceptionLogger(String message, Object... params) {
         super(message);
 

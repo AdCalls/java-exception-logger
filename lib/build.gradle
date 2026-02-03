@@ -6,19 +6,17 @@
  */
 
 plugins {
-    // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
-    // Maven publish plugin for publishing to Maven repositories
     id 'maven-publish'
+    id 'signing'
 }
 
 repositories {
-    // Use Maven Central for resolving dependencies.
     mavenCentral()
 }
 
 group = 'com.adcalls'
-version = '0.1.0'
+version = '1.0.1'
 
 dependencies {
     testImplementation libs.junit.jupiter
@@ -29,37 +27,82 @@ dependencies {
 
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
     }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
 
-            groupId = project.group
+            groupId = 'com.adcalls'
             artifactId = 'exception-logger'
             version = project.version
+
+            pom {
+                name = 'ExceptionLogger'
+                description = 'A custom exception class that automatically logs to SLF4J when thrown.'
+                url = 'https://github.com/AdCalls/java-exception-logger'
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'AdCalls'
+                        name = 'AdCalls'
+                        email = 'dev@adcalls.com'
+                    }
+                }
+
+                scm {
+                    connection = 'scm:git:git://github.com/AdCalls/java-exception-logger.git'
+                    developerConnection = 'scm:git:ssh://github.com/AdCalls/java-exception-logger.git'
+                    url = 'https://github.com/AdCalls/java-exception-logger'
+                }
+            }
         }
     }
 
     repositories {
         maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/AdCalls/java-exception-logger")
+            name = "OSSRH"
+            url = uri(
+                version.endsWith("SNAPSHOT")
+                    ? "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                    : "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+            )
+
             credentials {
-                username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-                password = project.findProperty("gpr.token") ?: System.getenv("GITHUB_TOKEN")
+                username = project.findProperty("ossrhUsername") ?: System.getenv("OSSRH_USERNAME")
+                password = project.findProperty("ossrhPassword") ?: System.getenv("OSSRH_PASSWORD")
             }
         }
     }
 }
 
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
+signing {
+    def signingKey = project.findProperty("signing.keyId") ?: System.getenv("SIGNING_KEY_ID")
+    def signingPassword = project.findProperty("signing.password") ?: System.getenv("SIGNING_PASSWORD")
+    def signingSecretKey = project.findProperty("signing.secretKeyRingFile") ?: System.getenv("SIGNING_SECRET_KEY_RING_FILE")
+
+    if (signingKey && signingPassword && signingSecretKey) {
+        project.ext.'signing.keyId' = signingKey
+        project.ext.'signing.password' = signingPassword
+        project.ext.'signing.secretKeyRingFile' = signingSecretKey
+        sign publishing.publications.mavenJava
+    }
 }
